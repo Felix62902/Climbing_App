@@ -1,0 +1,14 @@
+# --- OS ---
+.DS_Store
+Thumbs.db
+*.log
+
+# --- IDE / Editor Settings ---
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+.settings/
+.classpath
+.project
