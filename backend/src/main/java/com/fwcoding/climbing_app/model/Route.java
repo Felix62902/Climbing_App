@@ -1,6 +1,6 @@
 package com.fwcoding.climbing_app.model;
 
-import com.fwcoding.climbing_app.model.enums.RouteStatus;
+import com.fwcoding.climbing_app.enums.RouteStatus;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

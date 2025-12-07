@@ -27,7 +27,7 @@ public class Wall {
     private Gym gym;
 
     private String name;
-
+~
     private String photoUrl;
 
     @Enumerated(EnumType.STRING)

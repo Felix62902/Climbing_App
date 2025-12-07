@@ -1,5 +1,8 @@
 package com.fwcoding.climbing_app.model;
 
+import com.fwcoding.climbing_app.enums.ClimbStatus;
+import com.fwcoding.climbing_app.enums.WallType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -30,8 +33,8 @@ public class Climb {
     private Wall wall;
 
     @ManyToOne
-    @JoinColumn(name="pid")
-    private Project project;
+    @JoinColumn(name="rid")
+    private Route route;
 
     @Column(nullable = false)
     private String grade;
@@ -47,7 +50,7 @@ public class Climb {
     private Integer score;
 
     private String note;
-    
+
     @Enumerated(EnumType.STRING)
     private WallType wallType;
 }

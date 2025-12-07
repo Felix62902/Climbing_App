@@ -1,4 +1,4 @@
-package com.fwcoding.climbing_app.model.enums;
+package com.fwcoding.climbing_app.enums;
 
 
 public enum RouteStatus {
