@@ -1,6 +1,7 @@
 package com.fwcoding.climbing_app.model;
 
-import jakarta.persistence.Column;
+import com.fwcoding.climbing_app.model.enums.RouteStatus;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -14,40 +15,29 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name="climb")
-public class Climb {
-    
+@Table(name="route")
+public class Route {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long cid;
+    private Long rid;
 
     @ManyToOne
-    @JoinColumn(name="sid", nullable = false)
-    private Session session;
+    @JoinColumn(name = "uid", nullable = false)
+    private User user;
 
     @ManyToOne
-    @JoinColumn(name="wid", nullable = false)
+    @JoinColumn(name = "wid", nullable = false)
     private Wall wall;
 
-    @ManyToOne
-    @JoinColumn(name="pid")
-    private Project project;
-
-    @Column(nullable = false)
     private String grade;
-
-    @Column(nullable = false)
     private String color;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ClimbStatus status; // flashed, attempted, sent
-
-    private Integer attempts;
-    private Integer score;
+    private RouteStatus status; // ACTIVE, COMPLETED, ARCHIVED
 
     private String note;
-    
-    @Enumerated(EnumType.STRING)
-    private WallType wallType;
+
+    private String photoUrl;
+
 }
