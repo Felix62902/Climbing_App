@@ -14,7 +14,7 @@ public class GradeReference {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long grid;
+    private Long id;
 
     private String huecoScaleLabel;
     private String frenchScaleLabel;

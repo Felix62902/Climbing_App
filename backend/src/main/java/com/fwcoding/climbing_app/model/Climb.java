@@ -22,7 +22,7 @@ public class Climb {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long cid;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name="sid", nullable = false)

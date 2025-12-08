@@ -20,7 +20,7 @@ public class Wall {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long wid;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name="gid", nullable = false)
