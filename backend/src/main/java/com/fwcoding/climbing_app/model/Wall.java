@@ -26,6 +26,10 @@ public class Wall {
     @JoinColumn(name="gid", nullable = false)
     private Gym gym;
 
+    @ManyToOne
+    @JoinColumn(name = "uid", nullable = false)
+    private User user;
+
     private String name;
 ~
     private String photoUrl;
