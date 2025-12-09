@@ -13,7 +13,7 @@ public class Session {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long sid;
+    private Long id;
 
     @Column(nullable = false)
     private LocalDate sessionDate; 

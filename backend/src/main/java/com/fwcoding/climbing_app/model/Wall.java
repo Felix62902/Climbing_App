@@ -20,11 +20,15 @@ public class Wall {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long wid;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name="gid", nullable = false)
     private Gym gym;
+
+    @ManyToOne
+    @JoinColumn(name = "uid", nullable = false)
+    private User user;
 
     private String name;
     private String photoUrl;

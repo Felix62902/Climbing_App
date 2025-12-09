@@ -2,40 +2,41 @@ package com.fwcoding.climbing_app.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+import lombok.ToString;
 
 
 @Entity
 @Data
 @Table(name="user_stats")
-
 public class UserStats {
+
+    // shared key with user's ID as PK for this table too
     @Id 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="uid")
     private Long id;
 
-    private int totalClimbsAllTime;
-    private int currentBoulderGrade;
-
-    private double averageGrade;
-    private int highestBoulderGrade;
-    
-    private int totalProjects;
-    private int totalFlashAllTime;
-    
-    private double averageScore; // e.g., average difficulty score of climbs
-
-    private int totalXP; // experience points
-
-    private LocalDateTime lastUpdated;
-
-    @PreUpdate
-    @PrePersist
-    public void updateTimestamp() {
-        this.lastUpdated = LocalDateTime.now();
-    }
-
     @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @MapsId // connect id to the User's uid
+    @JoinColumn(name="uid")
+    @ToString.Exclude
     private User user;
-}
+
+    private int totalXp;
+
+    private int totalSends;
+
+    // private int totalSessions;
+    // private double totalClimbingTime; // in hours
+    private int totalProjects;
+
+    private int totalFlashes;
+
+    private String highestGrade;
+    private double averageScore;
+
+    private double averageSuccessRate; // percentage
+    
+    // Last time these stats were updated (Good for debugging)
+    private java.time.LocalDateTime lastUpdated;
+
+}   

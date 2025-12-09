@@ -20,7 +20,7 @@ public class Route {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long rid;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "uid", nullable = false)
