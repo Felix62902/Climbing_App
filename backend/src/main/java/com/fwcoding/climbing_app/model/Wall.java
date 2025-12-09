@@ -1,4 +1,4 @@
-package com.fwcoding.climbing_app.model;
+ package com.fwcoding.climbing_app.model;
 
 import com.fwcoding.climbing_app.enums.WallType;
 
@@ -27,7 +27,6 @@ public class Wall {
     private Gym gym;
 
     private String name;
-~
     private String photoUrl;
 
     @Enumerated(EnumType.STRING)

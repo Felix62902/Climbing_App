@@ -2,6 +2,7 @@ package com.fwcoding.climbing_app.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -13,28 +14,26 @@ public class UserStats {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int totalClimbs;
+    private int totalClimbsAllTime;
+    private int currentBoulderGrade;
 
+    private double averageGrade;
+    private int highestBoulderGrade;
     
-    private int totalSessions;
+    private int totalProjects;
+    private int totalFlashAllTime;
+    
+    private double averageScore; // e.g., average difficulty score of climbs
 
-        private double averageGrade;
-    
-        private double totalClimbingTime; // in hours
-    
-        private int highestGrade;
-    
-        private int totalProjects;
-    
-        private int totalOnsights;
-    
-        private int totalFlashs;
-    
-        private int totalFalls;
-    
-        private double averageSuccessRate; // percentage
+    private int totalXP; // experience points
 
+    private LocalDateTime lastUpdated;
 
+    @PreUpdate
+    @PrePersist
+    public void updateTimestamp() {
+        this.lastUpdated = LocalDateTime.now();
+    }
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
