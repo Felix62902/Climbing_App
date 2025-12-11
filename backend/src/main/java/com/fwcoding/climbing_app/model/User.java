@@ -6,7 +6,7 @@ import lombok.ToString;
 
 @Entity
 @Data
-@Table(name="users")
+@Table(name="users") // users as user is reserved in Springboot
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,12 +23,12 @@ public class User {
 
     // user has one set of stats
     @ToString.Exclude
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserStats stats;
 
     // user has one set of preferences
     @ToString.Exclude
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private UserPreferences preferences;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserPreference preferences;
     
 }

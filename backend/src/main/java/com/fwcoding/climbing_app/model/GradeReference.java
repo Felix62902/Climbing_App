@@ -17,7 +17,7 @@ public class GradeReference {
     private Long id;
 
     private String huecoScaleLabel;
-    private String frenchScaleLabel;
+    private String fontScaleLabel;
     private Integer points;
     private Integer sortOrder;
 }

@@ -15,9 +15,9 @@ public interface GradeReferenceRepository extends JpaRepository<GradeReference, 
 
     List<GradeReference> findByHuecoScaleLabel(String label);
     
-    List<GradeReference> findByFrenchScaleLabel(String label);
+    List<GradeReference> findByFontScaleLabel(String label);
 
-    // "Find the row where the label matches Hueco OR matches French"
-    @Query("SELECT g FROM GradeReference g WHERE g.huecoScaleLabel = :label OR g.frenchScaleLabel = :label")
+    // "Find the row where the label matches Hueco OR matches Font_Scale"
+    @Query("SELECT g FROM GradeReference g WHERE g.huecoScaleLabel = :label OR g.fontScaleLabel = :label")
     Optional<GradeReference> findByAnyLabel(@Param("label") String label);
 }

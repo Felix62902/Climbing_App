@@ -1,5 +1,7 @@
 package com.fwcoding.climbing_app.model;
 
+import com.fwcoding.climbing_app.enums.GradingSystem;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -24,8 +26,5 @@ public class UserPreference {
     private String theme;  // "light" or "dark"
 
     @Column(nullable = false)
-    private String gradingSystem; // "V", "Font", "French", etc.
-
-
-    
+    private GradingSystem gradingSystem; // "V", "Font",
 }
