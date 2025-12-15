@@ -14,7 +14,7 @@ import lombok.ToString;
 public class Gym {
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long gid;
+    private Long id;
 
     private String name;
 

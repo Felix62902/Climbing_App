@@ -16,6 +16,12 @@ public class User {
     private String username;
 
     @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
+
+    @Column(nullable = false)
     private String passwordHash;
 
     @Column(nullable = false, unique = true)

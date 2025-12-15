@@ -25,17 +25,14 @@ public class UserStats {
 
     private int totalSends;
 
-    // private int totalSessions;
-    // private double totalClimbingTime; // in hours
-    private int totalProjects;
+    // private int currentLevel;  //Beginner Advanced etc 
+
 
     private int totalFlashes;
 
-    private String highestGrade;
-    private double averageScore;
+    private String highestGrade;       // Visual: "V5" or "6c"
+    private int highestGradePoints;     // Logic: 500 (The points value of that grade, cached value obtained from gradereference. needed for comparison as difficult to compare by string val e.g. V1->v5)
 
-    private double averageSuccessRate; // percentage
-    
     // Last time these stats were updated (Good for debugging)
     private java.time.LocalDateTime lastUpdated;
 

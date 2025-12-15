@@ -1,6 +1,5 @@
 package com.fwcoding.climbing_app.model;
 
-import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.Data;

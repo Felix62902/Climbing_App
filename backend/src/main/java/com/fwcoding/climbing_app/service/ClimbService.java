@@ -1,6 +1,7 @@
 package com.fwcoding.climbing_app.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Use Spring's Transactional
 
 import com.fwcoding.climbing_app.dto.ClimbRequest;
 import com.fwcoding.climbing_app.dto.ClimbResponse;
@@ -9,170 +10,182 @@ import com.fwcoding.climbing_app.enums.WallType;
 import com.fwcoding.climbing_app.model.Climb;
 import com.fwcoding.climbing_app.model.Route;
 import com.fwcoding.climbing_app.model.Session;
+import com.fwcoding.climbing_app.model.User;
 import com.fwcoding.climbing_app.model.UserStats;
 import com.fwcoding.climbing_app.model.Wall;
 import com.fwcoding.climbing_app.repository.*;
-import jakarta.transaction.Transactional;
-
-// Required services:
-// find all climb that belonged to a user
-// allow an user to log a new climb in a session
-// update the statuses of a climb (e.g. attempted->Completed)
-// detlete a climb?
-
-// logClimb (Create):
-    // Save the climb.
-    // Side Effect: Calculate points -> Add to User's totalXp.
-    // Side Effect: Update User's highestGrade if this is a new personal best.
-// updateClimb (Edit):
-// Scenario: User logged a "Send" but meant "Flash".
-// Side Effect: Recalculate the score difference. (Flash is worth more). Update User's totalXp by adding/subtracting the difference.
-// deleteClimb (Delete):
-// Scenario: User accidentally logged a duplicate V5.
-// Side Effect: Subtract the points from the User's totalXp.
-// getClimbsBySession (Read):
-// Fetch all climbs for a specific session ID (to show the daily log).
 
 @Service
 public class ClimbService {
 
-    private RouteRepository routeRepo;
-    private ClimbRepository climbRepo;
-    private UserRepository userRepo;
-    private SessionRepository sessionRepo;
-    private WallRepository wallRepo;
-    private GradeReferenceRepository gradeRefRepo;
-    private UserStatsRepo userStatsRepo;
+    private final ClimbRepository climbRepo;
+    private final UserRepository userRepo;
+    private final SessionRepository sessionRepo;
+    private final WallRepository wallRepo;
+    private final GradeReferenceRepository gradeRefRepo;
+    private final RouteRepository routeRepo; // Fixed naming
 
-    public ClimbService(ClimbRepository climbRepo, UserRepository userRepo, SessionRepository sessionRepo, WallRepository wallRepo, GradeReferenceRepository gradeRefRepo, RouteRepository routeRepository, UserStatsRepo userStatsRepo){
+    public ClimbService(ClimbRepository climbRepo, 
+                        UserRepository userRepo, 
+                        SessionRepository sessionRepo, 
+                        WallRepository wallRepo, 
+                        GradeReferenceRepository gradeRefRepo, 
+                        RouteRepository routeRepo) { // Match param name
         this.climbRepo = climbRepo;
         this.userRepo = userRepo;
-        this.sessionRepo =sessionRepo;
+        this.sessionRepo = sessionRepo;
         this.wallRepo = wallRepo;
         this.gradeRefRepo = gradeRefRepo;
-        this.routeRepository = routeRepository;
-        this.userStatsRepo = userStatsRepo;
+        this.routeRepo = routeRepo; // FIX: Matches field name
     }
 
     @Transactional
-    public ClimbRequest LogClimb(ClimbRequest request){
-        // A. Save Climb
-        // B. Calculate Score
-        // C. Update UserStats (Add XP)
-        // 1: Convert DTO to entity
+    public ClimbResponse logClimb(ClimbRequest request) { // Lowercase 'l'
         Session session = sessionRepo.findById(request.getSessionId())
-            .orElseThrow(()-> new RuntimeException("Session not found"));
+            .orElseThrow(() -> new RuntimeException("Session not found"));
+            
         Wall wall = wallRepo.findById(request.getWallId())
-            .orElseThrow(()->new RuntimeException("Session not found"));
+            .orElseThrow(() -> new RuntimeException("Wall not found")); // FIX: Correct message
 
+        // 1. Climb Object Setup
         Climb climb = new Climb();
         climb.setSession(session);
         climb.setWall(wall);
+        
         if (request.getRouteId() != null) {
             Route route = routeRepo.findById(request.getRouteId()).orElse(null);
             climb.setRoute(route);
         } else {
-        climb.setRoute(null); // Explicitly fine
+            climb.setRoute(null);
         }
+        
         climb.setGrade(request.getGrade());
         climb.setColor(request.getColor());
+        climb.setNote(request.getNote());
 
-        try{
+        try {
             climb.setStatus(ClimbStatus.valueOf(request.getStatus()));
-        } catch(IllegalArgumentException e){
+        } catch(IllegalArgumentException e) {
             throw new RuntimeException("Invalid status: " + request.getStatus());
         }
 
+        // Attempts Logic
         if (request.getAttempts() == null || request.getAttempts() < 1) {
             climb.setAttempts(1);
         } else {
             climb.setAttempts(request.getAttempts());
         }
 
-        if (request.getWallType() != null){
-            try{
-                WallType wallType = WallType.valueOf((request.getWallType().toUpperCase()));
-                climb.setWallType(wallType);
-            } catch(IllegalArgumentException e){
+        // WallType Logic
+        if (request.getWallType() != null) {
+            try {
+                climb.setWallType(WallType.valueOf((request.getWallType().toUpperCase())));
+            } catch(IllegalArgumentException e) {
                 climb.setWallType(wall.getDefaultType());
             }
-        } else{
+        } else {
             climb.setWallType(wall.getDefaultType());
         }
 
-        climb.setNote(request.getNote());
-        // 2. points Calculation
+        // 2. Points Calculation
         int points = 0;
         var gradeRef = gradeRefRepo.findByAnyLabel(climb.getGrade());
 
-        if (gradeRef.isPresent()){
+        if (gradeRef.isPresent()) {
             points = gradeRef.get().getPoints();
-            if (climb.getStatus()==ClimbStatus.FLASH){
-                points *= 1.1;
+            if (climb.getStatus() == ClimbStatus.FLASH) {
+                points = (int) (points * 1.1); // Explicit cast is safer
             }
         }
-        climb.setScore(points);
-        // points are reduced for each attempts
+        
+        // Optional Penalty Logic
+        int penalty = (climb.getAttempts() - 1) * 10;
+        points = Math.max(0, points - penalty);
 
-        // 3. Update user stats
-        updateUserStats(session.getUser(), points, climb.getStatus());
+        climb.setScore(points);
+
+        // 3. Update User Stats (and auto-save via cascade/transaction)
+        updateUserStats(session.getUser(), points, climb);
 
         Climb saved = climbRepo.save(climb);
         return mapToResponse(saved);
     }
 
-    // THis is necessary as user may accidentally log an attempt (slippery finger/dup) and want to undo it
     @Transactional
-    public void deleteClimb(Long climbId){
+    public void deleteClimb(Long climbId) {
         Climb climb = climbRepo.findById(climbId)
                 .orElseThrow(() -> new RuntimeException("Climb not found with id: " + climbId));
 
-        //subtract the points and decrement the counters
-        // Navigate to the user stats: Climb -> Session -> User -> Stats
         UserStats stats = climb.getSession().getUser().getStats();
         
-        // Subtract the XP
+        // 1. Revert Points
         if (climb.getScore() != null) {
-            stats.setTotalXp(stats.getTotalXp() - climb.getScore());
+            // Ensure we don't go below zero (safety check)
+            int newTotal = Math.max(0, stats.getTotalXp() - climb.getScore());
+            stats.setTotalXp(newTotal);
         }
 
-        // Decrement totals flash/ Sent based on what the climb was
+        // 2. Revert Counters
         if (climb.getStatus() == ClimbStatus.SEND || climb.getStatus() == ClimbStatus.FLASH) {
-            stats.setTotalSends(stats.getTotalSends() - 1);
+            stats.setTotalSends(Math.max(0, stats.getTotalSends() - 1));
         }
         
         if (climb.getStatus() == ClimbStatus.FLASH) {
-            stats.setTotalFlashes(stats.getTotalFlashes() - 1);
+            stats.setTotalFlashes(Math.max(0, stats.getTotalFlashes() - 1));
         }
         
-        // Save the updated stats
-        userStatsRepo.save(stats);
+        // FIX: Save the USER, not the stats. 
+        // UserRepository expects a User entity.
+        userRepo.save(stats.getUser()); 
 
-        // delete the climb record
         climbRepo.delete(climb);
-    }
-
-    public ClimbResponse getClimbById(Long id) {
-        Climb climb = climbRepo.findById(id).orElseThrow();
-        return mapToResponse(climb);
     }
 
     // Helper method to convert Entity -> Response DTO
     private ClimbResponse mapToResponse(Climb climb) {
         ClimbResponse response = new ClimbResponse();
         
-        response.setId(climb.getId());
+        response.setId(climb.getId()); // Ensure your Climb model has getId()
         response.setGrade(climb.getGrade());
         response.setStatus(climb.getStatus().name());
         
-        response.setWallName(climb.getWall().getName()); 
-        response.setWallType(climb.getWall().getDefaultType().name());
+        if (climb.getWall() != null) {
+            response.setWallName(climb.getWall().getName()); 
+            if (climb.getWall().getDefaultType() != null) {
+                response.setWallType(climb.getWall().getDefaultType().name());
+            }
+        }
         
         if (climb.getRoute() != null) {
-            response.setRouteId(climb.getRoute().getId());
+            response.setRouteId(climb.getRoute().getId()); // Ensure Route model has getId() (or getRid())
         }
         
         return response;
     }
 
+    //Helper method to update user stats, total sends, total points, new PB etc
+    private void updateUserStats(User user, int points, Climb climb) {
+        UserStats stats = user.getStats();
+        
+        // Update XP
+        stats.setTotalXp(stats.getTotalXp() + points);
+
+        // Update Counters & Personal Bests
+        if (climb.getStatus() == ClimbStatus.SEND || climb.getStatus() == ClimbStatus.FLASH) {
+            stats.setTotalSends(stats.getTotalSends() + 1);
+            
+            // Check for High Score
+            if (points > stats.getHighestGradePoints()) {
+                stats.setHighestGrade(climb.getGrade());       
+                stats.setHighestGradePoints(points);       
+            }
+        }
+
+        if (climb.getStatus() == ClimbStatus.FLASH) {
+            stats.setTotalFlashes(stats.getTotalFlashes() + 1);
+        }
+        
+        // Note: No need to explicitly save here if called from within a @Transactional method
+        // Hibernate will auto-update the managed User entity at the end of the transaction.
+    }
 }
