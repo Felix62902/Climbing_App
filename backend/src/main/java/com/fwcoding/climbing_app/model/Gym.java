@@ -23,7 +23,7 @@ public class Gym {
     private boolean isSetupComplete; // NOTE: added, needed in GYM settings, false by default
 
     @Enumerated(EnumType.STRING)
-    private GradingSystem gradingSystem;
+    private GradingSystem gradingSystem; // e.g. Font / V / others
 
     @ToString.Exclude
     @OneToMany(mappedBy = "gym", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -31,7 +31,7 @@ public class Gym {
 
     @ToString.Exclude
     @OneToMany(mappedBy = "gym", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<GymGrade> gymGrades;
+    private List<GymGrade> gymGrades; // e.g. red -> v1
 
     //NOTE: Deleted as it is duplicated with gymGrades
     // @ElementCollection
