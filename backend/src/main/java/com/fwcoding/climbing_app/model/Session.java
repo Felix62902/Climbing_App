@@ -3,6 +3,7 @@ package com.fwcoding.climbing_app.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 // sid, uid, gid, date
@@ -15,8 +16,13 @@ public class Session {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // @Column(nullable = false)
+    // private LocalDate sessionDate; 
+
     @Column(nullable = false)
-    private LocalDate sessionDate; 
+    private LocalDateTime startTime;
+
+    private LocalDateTime endTime;
 
     // Optional: Notes about the session
     private String note;
