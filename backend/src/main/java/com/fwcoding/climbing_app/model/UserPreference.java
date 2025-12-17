@@ -4,6 +4,7 @@ import com.fwcoding.climbing_app.enums.GradingSystem;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 
 @Entity
@@ -15,16 +16,15 @@ public class UserPreference {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "uid", nullable = false, unique = true)
+    @MapsId // connect with user id to make sure both are identical
+    @JoinColumn(name = "user_id") 
+    @ToString.Exclude
     private User user;
-
-    // This links to your User table
-    @Column(nullable = false, unique = true)
-    private Long uid;  // same as user ID
 
     @Column(nullable = false)
     private String theme;  // "light" or "dark"
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private GradingSystem gradingSystem; // "V", "Font",
 }

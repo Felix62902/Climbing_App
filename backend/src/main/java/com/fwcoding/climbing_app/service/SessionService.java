@@ -21,8 +21,8 @@ import jakarta.transaction.Transactional;
 public class SessionService {
 
     private final SessionRepository sessionRepo;
-    private final UserRepository userRepo; // Missing in your code
-    private final GymRepository gymRepo;   // Missing in your code
+    private final UserRepository userRepo; 
+    private final GymRepository gymRepo;   
 
     public SessionService(SessionRepository sessionRepo, UserRepository userRepo, GymRepository gymRepo){
         this.sessionRepo = sessionRepo;
@@ -35,7 +35,6 @@ public class SessionService {
         //rememeber to set Gym setup incomplete if gym not in list
         User user = userRepo.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
-        
         Gym gym;
 
         // 2. Determine Gym Strategy
@@ -66,7 +65,6 @@ public class SessionService {
         session.setGym(gym);
         // session.setSessionDate(LocalDate.now());
         session.setStartTime(LocalDateTime.now());
-
 
         Session saved = sessionRepo.save(session);
         return mapToResponse(saved);
