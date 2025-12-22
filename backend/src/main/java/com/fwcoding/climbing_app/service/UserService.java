@@ -2,6 +2,8 @@ package com.fwcoding.climbing_app.service;
 
 import org.springframework.stereotype.Service;
 
+import com.fwcoding.climbing_app.dto.UserPreferenceRequest;
+import com.fwcoding.climbing_app.dto.UserPreferenceResponse;
 import com.fwcoding.climbing_app.dto.UserProfileResponse;
 import com.fwcoding.climbing_app.dto.UserRegistrationRequest;
 import com.fwcoding.climbing_app.enums.GradingSystem;
@@ -21,7 +23,7 @@ public class UserService {
     }
 
     @Transactional
-    public User RegisterUser(UserRegistrationRequest request){
+    public UserProfileResponse registerUser(UserRegistrationRequest request){
         User user = new User();
         UserPreference preference = new UserPreference();
         UserStats stats = new UserStats();
@@ -47,7 +49,8 @@ public class UserService {
         user.setStats(stats);
         user.setPreferences(preference);
 
-        return userRepository.save(user);
+        userRepository.save(user);
+        return new UserProfileResponse(user);
     }
 
     // gets the entire User Information, User stats, User preference
@@ -58,14 +61,12 @@ public class UserService {
 
 
     @Transactional
-    public User updateProfile(Long userId, UserRegistrationRequest request){
+    public UserProfileResponse updateProfile(Long userId, UserRegistrationRequest request){
         User user = userRepository.findById(userId)
             .orElseThrow(()->new RuntimeException("User not found"));
         
         UserPreference preference = user.getPreferences();
 
-        // --- User Update Logic ---
-        // Only update fields if they are sent (Optional check)
         if(request.getFirstName() != null) user.setFirstName(request.getFirstName());
         if(request.getLastName() != null) user.setLastName(request.getLastName());
         if(request.getEmail() != null) user.setEmail(request.getEmail());
@@ -77,15 +78,33 @@ public class UserService {
         }
 
         // Save the updates
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user); 
+        return new UserProfileResponse(savedUser);
     }
     
+    @Transactional
+    public UserPreferenceResponse updatePreferences(Long userId, UserPreferenceRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
+        UserPreference pref = user.getPreferences();
+
+        if (request.getTheme() != null) pref.setTheme(request.getTheme());
+        if (request.getGradingSystem() != null) {
+            pref.setGradingSystem(parseGradingSystem(request.getGradingSystem()));
+        }
+
+        userRepository.save(user);
+        return new UserPreferenceResponse(pref.getTheme(), pref.getGradingSystem().name());
+    }
+
+
+    // ------------------------- Helper methods ----------------------------------
     // Helper method to avoid code duplication
     private GradingSystem parseGradingSystem(String input) {
         if (input != null) {
             try {
-                return GradingSystem.valueOf(input);
+                return GradingSystem.valueOf(input.toUpperCase());
             } catch(IllegalArgumentException e){
                 return GradingSystem.V_SCALE; // Default fallback
             }
